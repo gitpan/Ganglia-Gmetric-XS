@@ -19,7 +19,7 @@ typedef struct ganglia_t {
 MODULE = Ganglia::Gmetric::XS    PACKAGE = Ganglia::Gmetric::XS
 
 SV *
-ganglia_initialize(class, config)
+_ganglia_initialize(class, config)
     SV   *class;
     char *config;
   PREINIT:
@@ -28,7 +28,8 @@ ganglia_initialize(class, config)
   CODE:
     if (SvROK(class))
       croak("Cannot call new() on a reference");
-    Newxz(gang, 1, ganglia);
+    /*Newxz(gang, 1, ganglia);*/
+    Newz(117, gang, 1, ganglia);
 #ifdef DIAG
     PerlIO_printf(PerlIO_stderr(), "config:%s\n", config);
 #endif
@@ -49,16 +50,12 @@ ganglia_initialize(class, config)
     if (! gang->gmetric)
       croak("failed to Ganglia_gmetric_create");
 
-    sv = newSViv(PTR2IV(gang));
-    sv = newRV_noinc(sv);
-    sv_bless(sv, gv_stashpv(SvPV_nolen(class), 1));
-    SvREADONLY_on(sv);
-    RETVAL = sv;
+    RETVAL = sv_setref_iv(newSV(0), SvPV_nolen(class), PTR2IV(gang));
   OUTPUT:
     RETVAL
 
 int
-ganglia_send(self, name, value, type, units, slope, tmax, dmax)
+_ganglia_send(self, name, value, type, units, slope, tmax, dmax)
     SV   *self;
     char *name;
     char *value;
@@ -88,6 +85,21 @@ ganglia_send(self, name, value, type, units, slope, tmax, dmax)
     }
 
     RETVAL = ! Ganglia_gmetric_send(gang->gmetric, gang->channel);
+#ifdef CLEAR_POOL
+    apr_pool_clear(gang->gmetric->pool);
+#endif
+  OUTPUT:
+    RETVAL
+
+unsigned int
+enabled_clear_pool(class)
+    SV *class;
+  CODE:
+#ifdef CLEAR_POOL
+    RETVAL = 1;
+#else
+    RETVAL = 0;
+#endif
   OUTPUT:
     RETVAL
 
@@ -99,6 +111,7 @@ DESTROY(self)
   CODE:
 #ifdef DIAG
     PerlIO_printf(PerlIO_stderr(), "DESTROY: called\n" );
+    PerlIO_printf(PerlIO_stderr(), "REFCNT:self=%d\n", SvREFCNT(self));
 #endif
     gang = XS_STATE(ganglia *, self);
     if (gang == NULL) {
@@ -112,6 +125,8 @@ DESTROY(self)
       Ganglia_gmetric_destroy(gang->gmetric);
     if (gang->context != NULL)
       Ganglia_pool_destroy(gang->context);
+    cfg_free(gang->gconfig);
+    Safefree(gang);
 #ifdef DIAG
     PerlIO_printf(PerlIO_stderr(), "DESTROY: done\n" );
 #endif

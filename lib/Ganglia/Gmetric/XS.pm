@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require XSLoader;
 XSLoader::load('Ganglia::Gmetric::XS', $VERSION);
@@ -14,13 +14,13 @@ sub new {
     my %args  = @_;
 
     my $config = delete $args{config} || "/etc/gmond.conf";
-    return ganglia_initialize($class, $config);
+    return _ganglia_initialize($class, $config);
 }
 
 sub send {
     my($self,%args) = @_;
 
-    return ganglia_send(
+    return _ganglia_send(
         $self,
         $args{name}  || "",
         $args{value} || "",
@@ -79,6 +79,13 @@ do send a metric value. %param is following:
   type   either string|int8|uint8|int16|uint16|int32|uint32|float|double
   units  unit of measure for the value e.g. "Kilobytes", "Celcius"
 
+=head2 enabled_clear_pool
+
+  print $gg->enabled_clear_pool ? "true" : "false";
+
+return true if you specify --enable-clear-pool option at "perl Makefile.PL".
+see also README file.
+
 =head1 SEE ALSO
 
 L<http://ganglia.info>
@@ -86,6 +93,10 @@ L<http://ganglia.info>
 =head1 AUTHOR
 
 HIROSE Masaaki, C<< <hirose@klab.org> >>
+
+=head1 REPOSITORY
+
+L<http://github.com/hirose31/ganglia-gmetric-xs/tree/master>
 
 =head1 BUGS
 
