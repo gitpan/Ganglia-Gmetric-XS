@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 require XSLoader;
 XSLoader::load('Ganglia::Gmetric::XS', $VERSION);
@@ -85,7 +85,7 @@ L<http://ganglia.info>
 
 =head1 AUTHOR
 
-HIROSE Masaaki, C<< <hirose@klab.org> >>
+HIROSE Masaaki, C<< <hirose31@gmail.com> >>
 
 =head1 REPOSITORY
 

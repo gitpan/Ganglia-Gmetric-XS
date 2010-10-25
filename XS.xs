@@ -7,12 +7,20 @@
 
 #include "ganglia.h"
 
+#ifdef GANGLIA30
+#  define Ganglia_metric          Ganglia_gmetric
+#  define Ganglia_metric_create   Ganglia_gmetric_create
+#  define Ganglia_metric_set      Ganglia_gmetric_set
+#  define Ganglia_metric_send     Ganglia_gmetric_send
+#  define Ganglia_metric_destroy  Ganglia_gmetric_destroy
+#endif
+
 #define XS_STATE(type, x) \
   INT2PTR(type, SvROK(x) ? SvIV(SvRV(x)) : SvIV(x))
 
 typedef struct ganglia_t {
   Ganglia_pool              context;
-  Ganglia_gmetric           gmetric;
+  Ganglia_metric            gmetric;
   Ganglia_udp_send_channels channel;
   Ganglia_gmond_config      gconfig;
 } ganglia;
@@ -66,13 +74,13 @@ _ganglia_send(self, name, value, type, units, slope, tmax, dmax)
     int   r;
     gang = XS_STATE(ganglia *, self);
 
-    gang->gmetric = Ganglia_gmetric_create(gang->context);
+    gang->gmetric = Ganglia_metric_create(gang->context);
     if (! gang->gmetric)
-      croak("failed to Ganglia_gmetric_create");
+      croak("failed to Ganglia_metric_create");
 #ifdef DIAG
     PerlIO_printf(PerlIO_stderr(), "send:%s=%s\n", name,value);
 #endif
-    r = Ganglia_gmetric_set(gang->gmetric, name, value, type, units, slope, tmax, dmax);
+    r = Ganglia_metric_set(gang->gmetric, name, value, type, units, slope, tmax, dmax);
     switch(r) {
     case 1:
       croak("gmetric parameters invalid. exiting.\n");
@@ -84,8 +92,8 @@ _ganglia_send(self, name, value, type, units, slope, tmax, dmax)
       croak("the value parameter \"%s\" does not represent a number. exiting.\n", value);
     }
 
-    RETVAL = ! Ganglia_gmetric_send(gang->gmetric, gang->channel);
-    Ganglia_gmetric_destroy(gang->gmetric);
+    RETVAL = ! Ganglia_metric_send(gang->gmetric, gang->channel);
+    Ganglia_metric_destroy(gang->gmetric);
   OUTPUT:
     RETVAL
 

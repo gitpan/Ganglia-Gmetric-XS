@@ -1,11 +1,13 @@
 ---
 abstract: 'send a metric value to gmond with libganglia C library'
 author:
-  - 'HIROSE Masaaki, C<< <hirose@klab.org> >>'
+  - 'HIROSE Masaaki, C<< <hirose31@gmail.com> >>'
 build_requires:
-  Test::More: 0
+  ExtUtils::MakeMaker: 6.42
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.77'
+generated_by: 'Module::Install version 0.97'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -13,10 +15,11 @@ meta-spec:
 name: Ganglia-Gmetric-XS
 no_index:
   directory:
+    - example
     - inc
     - t
 requires:
   Filter::Util::Call: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.01
+version: 1.02
