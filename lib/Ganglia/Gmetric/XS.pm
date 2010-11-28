@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 require XSLoader;
 XSLoader::load('Ganglia::Gmetric::XS', $VERSION);
@@ -26,6 +26,9 @@ sub send {
         $args{value} || "",
         $args{type}  || "",
         $args{units} || "",
+        $args{group} || "",
+        $args{desc}  || "",
+        $args{title} || "",
         3, 60, 0);
 }
 
@@ -78,6 +81,9 @@ do send a metric value. %param is following:
   value  value of the metric
   type   either string|int8|uint8|int16|uint16|int32|uint32|float|double
   units  unit of measure for the value e.g. "Kilobytes", "Celcius"
+  group  group name of metric. (optional)
+  desc   description of metric. (optional)
+  title  title of metric. (optional)
 
 =head1 SEE ALSO
 
